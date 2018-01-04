@@ -87,8 +87,10 @@ describe('GET /todos', () => {
 
 describe('GET /todos/:id', () => {
     it('should return todo doc', done => {
+        const validId = TODOS[0]._id.toHexString();
+
         request(app)
-            .get(`/todos/${TODOS[0]._id.toHexString()}`)
+            .get(`/todos/${validId}`)
             .expect(200)
             .expect(res => {
                 expect(res.body.todo.text).toBe(TODOS[0].text);
@@ -97,15 +99,60 @@ describe('GET /todos/:id', () => {
     });
 
     it('should return 404 if todo not found', done => {
+        const nonExistingId = new ObjectID().toHexString();
+
         request(app)
-            .get(`/todos/${new ObjectID().toHexString()}`)
+            .get(`/todos/${nonExistingId}`)
             .expect(404)
             .end(done);
     });
 
     it('should return 400 for non valid object ids', done => {
+        const nonValidId = '123';
+
         request(app)
-            .get('/todos/123')
+            .get(`/todos/${nonValidId}`)
+            .expect(400)
+            .end(done);
+    });
+});
+
+describe('DELETE /todos/:id', () => {
+    it('should remove a todo', done => {
+        const validId = TODOS[0]._id.toHexString();
+
+        request(app)
+            .delete(`/todos/${validId}`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.todo.text).toEqual(TODOS[0].text);
+            })
+            .end((err, res)=> {
+            if (err) {
+                return done(err);
+            }
+
+            Todo.findById(validId).then(todo => {
+                expect(todo).toBeNull();
+                done();
+            }).catch(err => done(err));
+        })
+    });
+
+    it('should return 404 when no todo found', done => {
+        const nonExistingId = new ObjectID().toHexString();
+
+        request(app)
+            .delete(`/todos/${nonExistingId}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it('should return 400 for non valid object ids', done => {
+        const nonValidId = '123';
+
+        request(app)
+            .delete(`/todos/${nonValidId}`)
             .expect(400)
             .end(done);
     });
