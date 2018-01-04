@@ -7,6 +7,7 @@ const { Todo } = require('./models/todo');
 const { Users } = require('./models/user');
 
 var app = express();
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
@@ -52,9 +53,26 @@ app.get('/todos/:id', (req, res) => {
     })
 });
 
+app.delete('/todos/:id', (req, res) => {
+   var id = req.params.id;
 
-app.listen(3000, () => {
-    console.log('Magic happens on 3000');
+   if (!ObjectID.isValid(id)) {
+       res.status(400).send();
+   }
+
+   Todo.findByIdAndRemove(id).then(todo => {
+       if (!todo) {
+           res.status(404).send();
+       }
+
+       res.send({ todo });
+   }).catch(err => {
+       res.status(400).send();
+   })
+});
+
+app.listen(port, () => {
+    console.log(`Magic happens on ${port}`);
 });
 
 module.exports = {
