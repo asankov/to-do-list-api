@@ -7,7 +7,7 @@ const { ObjectID } = require('mongodb');
 
 const { mongoose } = require('./db/mongoose');
 const { Todo } = require('./models/todo');
-const { Users } = require('./models/user');
+const { User } = require('./models/user');
 
 const app = express();
 const port = process.env.PORT;
@@ -76,7 +76,6 @@ app.delete('/todos/:id', (req, res) => {
 
 app.patch('/todos/:id', (req, res) => {
     const id = req.params.id;
-
     const body = _.pick(req.body, ['text', 'completed']);
 
     if (!ObjectID.isValid(id)) {
@@ -99,7 +98,35 @@ app.patch('/todos/:id', (req, res) => {
     }).catch(err => {
         res.status(400).send();
     })
+});
 
+app.post('/users', (req, res) => {
+    const body = _.pick(req.body, ['name', 'email', 'password']);
+    const user = new User(body);
+
+    user.save().then(user => {
+        res.send(user);
+    }).catch(err => {
+        res.status(400).send(err);
+    })
+});
+
+app.get('/users/:id', (req, res) => {
+    const id = req.params.id;
+
+    if (!ObjectID.isValid(id)) {
+        res.status(400).send();
+    }
+
+    User.findById(id).then(user => {
+        if (!user) {
+            res.status(404).send();
+        }
+
+        res.send({ user });
+    }).catch(err => {
+        res.status(400).send();
+    })
 });
 
 app.listen(port, () => {
