@@ -12,7 +12,7 @@ const USERS = [{
     password: 'user_one_pass',
     tokens: [{
         access: 'auth',
-        token: jwt.sign({_id: USER_IDS[0], access: 'auth'}, 'abc123').toString()
+        token: jwt.sign({_id: USER_IDS[0], access: 'auth'}, 'aaa').toString()
     }]
 },{
     _id: USER_IDS[1],

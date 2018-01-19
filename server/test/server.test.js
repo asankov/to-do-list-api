@@ -4,6 +4,7 @@ const { ObjectID } = require('mongodb');
 
 const { app } = require('./../server');
 const { Todo } = require('./../models/todo');
+const { User } = require('./../models/user');
 const { TODOS, USERS, populateTodos, populateUsers } = require('./seed/seed');
 
 beforeEach(populateUsers);
@@ -186,4 +187,126 @@ describe('PATCH /todos/:id', () => {
             })
             .end(done);
     })
+});
+
+describe('GET /usersme', () => {
+    it('should return user if authenticated', done => {
+       request(app)
+           .get('/usersme')
+           .set('x-auth', USERS[0].tokens[0].token)
+           .expect(200)
+           .expect( res => {
+               expect(res.body._id).toBe(USERS[0]._id.toHexString());
+               expect(res.body.email).toBe(USERS[0].email);
+           })
+           .end(done);
+    });
+
+    it('should return 401 if not authenticated', done => {
+        request(app)
+            .get('/usersme')
+            .expect(401)
+            .expect( res => {
+                expect(res.body).toEqual({});
+            })
+            .end(done);
+    });
+});
+
+describe('POST /users', () => {
+    it('should create a user', done => {
+        request(app)
+            .post('/users')
+            .send({
+                name: 'user_one',
+                email: 'test_one@test.com',
+                password: 'password123!'
+            })
+            .expect(200)
+            .expect( res => {
+                expect(res.headers['x-auth']).toBeDefined();
+                expect(res.body._id).toBeDefined();
+                expect(res.body.email).toBe('test_one@test.com');
+            })
+            .end(err => {
+                if (err) {
+                    return done(err);
+                }
+
+                User.findOne({email: 'test_one@test.com'}).then(user => {
+                    expect(user).toBeDefined();
+                    expect(user.password).not.toBe('password123!');
+                    done();
+                })
+            });
+    });
+
+    it('should return validation error if name is empty', done => {
+        request(app)
+            .post('/users')
+            .send({
+                email: 'test_two@test.com',
+                password: 'password123!'
+            })
+            .expect(400)
+            .end(done)
+
+    });
+
+    it('should return validation error if email is empty', done => {
+        request(app)
+            .post('/users')
+            .send({
+                name: 'test_two',
+                password: 'password123!'
+            })
+            .expect(400)
+            .end(done)
+    });
+
+    it('should return validation error if email is invalid', done => {
+        request(app)
+            .post('/users')
+            .send({
+                name: 'test_two',
+                email: 'invalid_email',
+                password: 'password123!'
+            })
+            .expect(400)
+            .end(done)
+    });
+
+    it('should return validation error if password is empty', done => {
+        request(app)
+            .post('/users')
+            .send({
+                name: 'test_two',
+                email: 'test_three@test.com'
+            })
+            .expect(400)
+            .end(done)
+    });
+
+    it('should return validation error if password is shorter than 6 symbols', done => {
+        request(app)
+            .post('/users')
+            .send({
+                name: 'test_three',
+                email: 'test_three@test.com',
+                password: '123'})
+            .expect(400)
+            .end(done)
+    });
+
+    it('should not create user if email is already in use', done => {
+        request(app)
+            .post('/users')
+            .send({
+                name: 'test_four',
+                email: USERS[0].email,
+                password: 'password123!'
+            })
+            .expect(400)
+            .end(done)
+    });
 });
