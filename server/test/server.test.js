@@ -241,18 +241,6 @@ describe('POST /users', () => {
             });
     });
 
-    it('should return validation error if name is empty', done => {
-        request(app)
-            .post('/users')
-            .send({
-                email: 'test_two@test.com',
-                password: 'password123!'
-            })
-            .expect(400)
-            .end(done)
-
-    });
-
     it('should return validation error if email is empty', done => {
         request(app)
             .post('/users')
