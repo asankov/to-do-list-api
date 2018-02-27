@@ -237,7 +237,7 @@ describe('POST /users', () => {
                     expect(user).toBeDefined();
                     expect(user.password).not.toBe('password123!');
                     done();
-                })
+                }).catch(e => done(e));
             });
     });
 
@@ -308,5 +308,54 @@ describe('POST /users', () => {
             })
             .expect(400)
             .end(done)
+    });
+});
+
+describe('POST /users/login', () => {
+    it('should login users and return and token', done => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: USERS[1].email,
+                password: USERS[1].password
+            })
+            .expect(200)
+            .expect(res => {
+                expect(res.header['x-auth']).toBeDefined();
+            })
+            .end((err, res) => {
+                if(err){
+                    return done(err);
+                }
+
+                User.findById(USERS[1]._id).then(user => {
+                    expect(user.tokens[0]['access']).toBe('auth');
+                    expect(user.tokens[0]['token']).toBe(res.header['x-auth']);
+                }).catch(e => done(e));
+                done()
+            });
+    });
+
+    it('should reject invalid login', done => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: USERS[1].email,
+                password: 'invalid_password'
+            })
+            .expect(400)
+            .expect(res => {
+                expect(res.header['x-auth']).toBeUndefined();
+            })
+            .end((err, res) => {
+                if(err){
+                    return done(err);
+                }
+
+                User.findById(USERS[1]._id).then(user=>{
+                    expect(user.tokens.length).toBe(0);
+                }).catch(e => done(e));
+                done()
+            });
     });
 });
