@@ -62,7 +62,7 @@ describe('GET /todos', () => {
   });
 
   it('should return 204 when no todos found', done => {
-    Todo.remove().then(() => {
+    Todo.deleteMany().then(() => {
 
       request(app)
         .get('/todos')
