@@ -22,6 +22,7 @@
     "lodash": "^4.17.4",
     "mongodb": "^2.2.5",
     "mongoose": "^5.0.0-rc0",
+    "swagger-ui-express": "^4.0.1",
     "validator": "^9.2.0"
   },
   "devDependencies": {

@@ -1,0 +1,60 @@
+{
+  "info": {
+    "title": "Node Swagger API",
+    "version": "1.0.0",
+    "description": "Demonstrating how to describe a RESTful API with Swagger"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "swagger": "2.0",
+  "paths": {
+    "/users": {
+      "post": {
+        "summary": "Post a new user",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "body",
+            "description": "The user to be created",
+            "schema": {
+              "required": [
+                "name",
+                "password",
+                "email"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created user",
+            "schema": {
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The provided parameters are not valid"
+          }
+        }
+      }
+    }
+  }
+}
