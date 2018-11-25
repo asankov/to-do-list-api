@@ -183,10 +183,10 @@ describe('PATCH /todos/:id', () => {
   })
 });
 
-describe('GET /usersme', () => {
+describe('GET /users/me/user', () => {
   it('should return user if authenticated', done => {
     request(app)
-      .get('/usersme')
+      .get('/users/me/user')
       .set('x-auth', USERS[0].tokens[0].token)
       .expect(200)
       .expect(res => {
@@ -198,7 +198,7 @@ describe('GET /usersme', () => {
 
   it('should return 401 if not authenticated', done => {
     request(app)
-      .get('/usersme')
+      .get('/users/me/user')
       .expect(401)
       .expect(res => {
         expect(res.body).toEqual({});
